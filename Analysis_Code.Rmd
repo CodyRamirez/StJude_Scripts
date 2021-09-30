@@ -1,0 +1,83 @@
+---
+title: "VSX2_Analysis"
+author:
+  name: "Cody Ramirez"
+  email: cody.ramirez@stjude.org
+  affiliation: St. Jude Children's Research Hospital, Memphis, TN
+date: "8/16/2021"
+output: html_document
+---
+
+
+```{r}
+#Loadds in important libraries for downstream analysis
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(future)
+library(sctransform)
+library(leiden)
+library(harmony)
+library(Rcpp)
+library(rliger)
+library(cowplot)
+library(patchwork)
+library(SeuratWrappers)
+library(dittoSeq)
+library(stringr)
+library(knitr)
+
+# For consistency in tSNE/UMAP.
+set.seed(1234)
+# Sets the future settings for multicore processing
+plan(strategy = "multiprocess", workers = 50)#Changing the current plan to access parallelization
+options(parallelly.fork.enable = TRUE, future.globals.maxSize = +Inf, future.seed = TRUE) #enables forking in Rstudio (potentially unstable)
+plan()
+
+#pull standard cell cycle genes for cell cycle scoring
+#Had to change genes to title case for mice genes (Human genes are annotated in all CAPS)
+s.genes <- str_to_title(cc.genes.updated.2019$s.genes)
+g2m.genes <- str_to_title(cc.genes.updated.2019$g2m.genes)
+
+#identifies all samples in directory based on folder names
+samples <- list.dirs(paste(full_path, "/CellRangerCount", sep = ""), recursive = F)
+
+#reads QC spreadsheet (columns are 'Sample', 'lower', 'upper', and 'mito')
+qc_cutoff <- read.csv(paste(full_path, "/scRNAseq_QC_cutoff.tsv", sep = ""), sep = '\t', header = TRUE)
+
+
+#this for loop, pulls cellbender corrected count matrices and generates QC plots
+sample.name <- vector()
+Seurat.obj <- list()
+
+
+
+for (i in 1:length(samples)){
+  
+  Seurat.data <- Read10X(data.dir = paste(full_path, "/CellRangerCount/", sample.name[i], "/outs/filtered_feature_bc_matrix", sep = ""))
+
+  Seurat.obj[[i]] <- CreateSeuratObject(counts = Seurat.data, min.cells = 3, min.features = 200)
+
+  Seurat.obj[[i]]$Sample <- sample.name[i]
+
+  Seurat.obj[[i]] <- PercentageFeatureSet(Seurat.obj[[i]], pattern = "^mt-", col.name = "percent.mito")
+  
+  
+  #View of data before filtering is conducted
+  VlnPlot(object = Seurat.obj[[i]], features = c("nCount_RNA", "nFeature_RNA", "percent.mito"), pt.size = 0, ncol = 2)
+  FeatureScatter(object = Seurat.obj[[i]], feature1 = "nCount_RNA", feature2 = "percent.mito") + ggplot2::geom_hline(yintercept = qc_cutoff$mito[i])
+  FeatureScatter(object = Seurat.obj[[i]], feature1 = "nCount_RNA", feature2 = "nFeature_RNA") + ggplot2::geom_hline(yintercept = qc_cutoff$lower[i]) + ggplot2::geom_hline(yintercept = qc_cutoff$upper[i])
+
+  #Filtering cells by # of genes and mitochondrial content
+  ############################################################################################################
+  Seurat.obj[[i]] <- subset(x = Seurat.obj[[i]], subset = nFeature_RNA < qc_cutoff$upper[i] & nFeature_RNA > qc_cutoff$lower[i] & percent.mito < qc_cutoff$mito[i])
+  ############################################################################################################
+  
+  #View of data after filtering is conducted
+  VlnPlot(object = Seurat.obj[[i]], features = c("nCount_RNA", "nFeature_RNA", "percent.mito"), pt.size = 0, ncol = 2)
+  FeatureScatter(object = Seurat.obj[[i]], feature1 = "nCount_RNA", feature2 = "percent.mito") + ggplot2::geom_hline(yintercept = qc_cutoff$mito[i])
+  FeatureScatter(object = Seurat.obj[[i]], feature1 = "nCount_RNA", feature2 = "nFeature_RNA") + ggplot2::geom_hline(yintercept = qc_cutoff$lower[i]) + ggplot2::geom_hline(yintercept = qc_cutoff$upper[i])
+
+}
+rm(qc_cutoff, Seurat.data)
+```
