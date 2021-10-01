@@ -494,3 +494,233 @@ Generate.Cell.Signature.Plots.Top50 <- function(Seurat.Exp, Experiment.Number, I
   return(Seurat.Exp)
 }
 ```
+
+
+
+
+
+```{r}
+#############################################################
+# ADULT WT CONTROLS
+#############################################################
+Seurat.list <- list(Seurat.obj[[5]], Seurat.obj[[7]], Seurat.obj[[11]])
+current.exp <- Harmony.Integration(Seurat.list)
+
+Generate.Feature.Plots(current.exp, "WT_CONTROLS", "Harmony", "Adult")
+
+current.exp <- RenameIdents(current.exp, '1'='Rod', '2'='Rods', '3'='Bipolar', '4'='Cones', '5'='Muller glia', '6'='Amacrine', '7'='Amacrine', '8'='Bipolar', '9'='Bipolar', '10'='Bipolar', '11'='Amacrine', '12'='Bipolar', '13'='Amacrine', '14'='Amacrine', '15'='Amacrine', '16'='Amacrine', '17'='Bipolar', '18'='Bipolar', '19'='Bipolar', '20'='Endothelial', '21'='Bipolar', '22'='Amacrine', '23'='RPE', '24'='Amacrine', '25'='RGC', '26'='Amacrine', '27'='Horizontal')
+
+AllMarkers <- FindAllMarkers(current.exp, logfc.threshold = 1, return.thresh = 0.001)
+write.csv(AllMarkers, file = paste(full_path, "Experiment#", "WT_CONTROLS", "/", "Harmony", "_Integration/6_", "Harmony", "_clusters_markers.csv", sep = ""))
+
+pdf(file = paste(full_path, "Experiment#", "WT_CONTROLS", "/", "Harmony", "_Integration/5_", "Harmony", "_clusters_labeled_plot.pdf", sep = ""), width = 12, height = 12)
+print(DimPlot(current.exp, label = TRUE))
+dev.off()
+
+
+
+#############################################################
+# E14.5 WT CONTROL
+#############################################################
+current.exp <- Single.Sample(Seurat.obj[[3]])
+
+current.exp <- RenameIdents(current.exp, '1'='RPC', '2'='RPC', '3'='RGC', '4'='Cones', '5'='RPC', '6'='Amacrine', '7'='Neurogenic', '8'='Lens fiber', '9'='RPC', '10'='RGC', '11'='RPC', '12'='Erythrocyte', '13'='Embryonic astrocyte', '14'='Endothelial', '15'='Lens fiber', '16'='Endothelial')
+
+AllMarkers <- FindAllMarkers(current.exp, logfc.threshold = 1, return.thresh = 0.001)
+write.csv(AllMarkers, file = paste(full_path, "Experiment#", "E14.5_WT", "/", "SingleSample", "_Integration/6_", "Single_Sample", "_clusters_markers.csv", sep = ""))
+
+Generate.Feature.Plots(current.exp, "E14.5_WT", "SingleSample", "Embryonic")
+
+pdf(file = paste(full_path, "Experiment#", "E14.5_WT", "/", "SingleSample", "_Integration/5_", "SingleSample", "_cellcycle_plot.pdf", sep = ""), width = 6, height = 6)
+print(DimPlot(current.exp, group.by = 'Phase', cols = c('black', 'grey', 'grey')))
+dev.off()
+```
+
+
+
+
+
+```{r}
+#############################################################
+# EXPERIMENT 1
+#############################################################
+Seurat.list <- list(Seurat.obj[[4]], Seurat.obj[[5]])
+Exp1 <- Harmony.Integration(Seurat.list)
+Exp1 <- Generate.Cell.Signature.Plots.Top50(Exp1, "1", "Harmony", "Adult")
+
+All.cell.scores <- data.frame(Exp1$rod_score1, Exp1$bipolar_score1, Exp1$cone_score1, Exp1$muller_glia_score1, Exp1$amacrine_score1, Exp1$retinal_ganglion_score1, Exp1$horizontal_score1, Exp1$RPE_score1, Exp1$endothelial_score1)
+best_cell_score <- colnames(All.cell.scores)[max.col(All.cell.scores, ties.method = "first")]
+best_cell_score <- sub("Exp1.", "", best_cell_score)
+best_cell_score <-  sub("_score1", "", best_cell_score)
+Exp1$cell.ident <- best_cell_score
+cell_score_colors = c("rod"="cornsilk2", "bipolar"="goldenrod1", "cone"="darkorchid4", "muller_glia"="dodgerblue2", "amacrine"="darkseagreen3", "retinal_ganglion"="darkolivegreen2", "horizontal"="firebrick3", "RPE"="tan3", "endothelial"="cadetblue2")
+
+
+pdf(file = paste(full_path, "Experiment#1/Harmony_Integration/5_Final_labeled_cluster_plot2.pdf", sep = ""), width = 12, height = 6)
+Exp1Plot <- DimPlot(Exp1, split.by="Sample", group.by = "cell.ident", cols=cell_score_colors, pt.size = 1)
+Exp1Plot[[1]]$layers[[1]]$aes_params$alpha = 0.75
+print(Exp1Plot)
+dev.off()
+
+write.csv(table(Exp1$cell.ident, Exp1$Sample), file = paste(full_path, "Experiment#1/Harmony_Integration/6_Cell_cluster_count_data.csv", sep = ""))
+write.csv(prop.table(table(Exp1$cell.ident, Exp1$Sample), margin = 2) *100, file = paste(full_path, "Experiment#1/Harmony_Integration/6_Cell_cluster_percentage_data.csv", sep = ""))
+
+
+cell.percentage.data <- data.frame(prop.table(table(Exp1$cell.ident, Exp1$Sample), margin = 2) *100)
+pdf(file = paste(full_path, "Experiment#1/Harmony_Integration/6_Cell_cluster_percentage_plot.pdf", sep = ""), width = 12, height = 3)
+print(ggplot(aes(y=Freq, x=Var2, fill=Var1), data = cell.percentage.data) + geom_bar(stat = 'identity') + coord_flip() + scale_fill_manual('Cell types', values = cell_score_colors) + theme_classic())
+dev.off()
+
+rm(Seurat.list, All.cell.scores, best_cell_score, cell_score_colors, cell.percentage.data)
+```
+
+
+
+
+
+```{r}
+#############################################################
+# EXPERIMENT 2
+#############################################################
+Seurat.list <- list(Seurat.obj[[3]], Seurat.obj[[8]])
+Exp2 <- Harmony.Integration(Seurat.list)
+Exp2 <- Generate.Cell.Signature.Plots.Top50(Exp2, "2", "Harmony", "Embryonic")
+
+All.cell.scores <- data.frame(Exp2$retinal_progenitor_score1, Exp2$neurogenic_score1, Exp2$retinal_ganglion_score1, Exp2$cone_score1, Exp2$amacrine_score1, Exp2$endothelial_score1, Exp2$erythrocytes_score1, Exp2$embryonic_astrocytes_score1, Exp2$lens_fiber_score1)
+best_cell_score <- colnames(All.cell.scores)[max.col(All.cell.scores, ties.method = "first")]
+best_cell_score <- sub("Exp2.", "", best_cell_score)
+best_cell_score <-  sub("_score1", "", best_cell_score)
+Exp2$cell.ident <- best_cell_score
+cell_score_colors = c("retinal_progenitor"="indianred2", "neurogenic"="cadetblue2", "retinal_ganglion"="darkolivegreen2", "cone"="darkorchid4", "amacrine"="darkseagreen3", "endothelial"="darkorange", "erythrocytes"="pink2", "embryonic_astrocytes"="tan3", "lens_fiber"="firebrick3")
+
+
+
+pdf(file = paste(full_path, "Experiment#2/Harmony_Integration/5_Final_labeled_cluster_cell_score_plot.pdf", sep = ""), width = 8, height = 6)
+print(DimPlot(Exp2, group.by = "cell.ident", cols=cell_score_colors))
+dev.off()
+
+write.csv(table(Exp2$cell.ident, Exp2$Sample), file = paste(full_path, "Experiment#2/Harmony_Integration/5_Cell_cluster_count_cell_score_data.csv", sep = ""))
+write.csv(prop.table(table(Exp2$cell.ident, Exp2$Sample), margin = 2) *100, file = paste(full_path, "Experiment#2/Harmony_Integration/5_Cell_cluster_percentage_cell_score_data.csv", sep = ""))
+
+df <- data.frame(prop.table(table(Exp2$cell.ident, Exp2$Sample), margin = 2) *100)
+pdf(file = paste(full_path, "Experiment#2/Harmony_Integration/5_Cell_cluster_percentage_cell_score_plot.pdf", sep = ""), width = 12, height = 4)
+print(ggplot(aes(y=Freq, x=Var2, fill=Var1), data = df) + geom_bar(stat = 'identity') + coord_flip() + scale_fill_manual('Cell types', values = cell_score_colors) + theme_classic())
+dev.off()
+
+
+
+
+
+pdf(file = paste(full_path, "Experiment#2/Harmony_Integration/6_Cell_cycle_Final_labeled_cluster_plot.pdf", sep = ""), width = 6, height = 6)
+print(DimPlot(Exp2, group.by = 'Phase', cols = c('grey', 'black', 'black')))
+dev.off()
+
+write.csv(table(Exp2@meta.data$Phase, Exp2$Sample), file = paste(full_path, "Experiment#2/Harmony_Integration/6_Cell_cycle_cluster_count_data.csv", sep = ""))
+write.csv(prop.table(table(Exp2@meta.data$Phase, Exp2$Sample), margin = 2) *100, file = paste(full_path, "Experiment#2/Harmony_Integration/6_Cell_cycle_cluster_percentage_data.csv", sep = ""))
+
+df <- data.frame(prop.table(table(Exp2@meta.data$Phase, Exp2$Sample), margin = 2) *100)
+pdf(file = paste(full_path, "Experiment#2/Harmony_Integration/6_Cell_cycle_cluster_percentage_plot.pdf", sep = ""), width = 12, height = 3)
+print(ggplot(aes(y=Freq, x=Var2, fill=Var1), data = df) + geom_bar(stat = 'identity') + coord_flip() + scale_fill_manual('Cell cycle', values = c("grey", "black", "black")) + theme_classic())
+dev.off()
+
+rm(Seurat.list, All.cell.scores, best_cell_score, cell_score_colors, df)
+```
+
+
+
+
+
+```{r}
+#############################################################
+# EXPERIMENT 8
+#############################################################
+Seurat.obj[[1]]$Condition <- "CRC-SE KO"
+Seurat.obj[[2]]$Condition <- "CRC-SE KO"
+Seurat.obj[[6]]$Condition <- "Region1 KO"
+Seurat.obj[[7]]$Condition <- "WT"
+Seurat.obj[[9]]$Condition <- "Region0 KO"
+Seurat.obj[[10]]$Condition <- "Region0 KO"
+Seurat.obj[[11]]$Condition <- "WT"
+Seurat.obj[[12]]$Condition <- "Region1 KO"
+Seurat.obj[[14]]$Condition <- "Region3 KO"
+Seurat.obj[[15]]$Condition <- "OrJ"
+
+Seurat.list <- list(Seurat.obj[[1]], Seurat.obj[[2]], Seurat.obj[[6]], Seurat.obj[[7]], Seurat.obj[[9]], Seurat.obj[[10]], Seurat.obj[[11]], Seurat.obj[[12]], Seurat.obj[[14]], Seurat.obj[[15]])
+Exp8 <- Harmony.Integration(Seurat.list)
+
+# AllMarkers <- FindAllMarkers(Exp8, logfc.threshold = 1, return.thresh = 0.001)
+# write.csv(AllMarkers, file = paste(full_path, "Experiment#8/Harmony_Integration/5_TopDE_clusters_markers.csv", sep = ""))
+
+Exp8 <- Generate.Cell.Signature.Plots.Top50(Exp8, "8", "Harmony", "Adult")
+cell_cluster_scores <- data.frame(Exp8$rod_score1, Exp8$bipolar_score1, Exp8$cone_score1, Exp8$muller_glia_score1, Exp8$amacrine_score1, Exp8$retinal_ganglion_score1, Exp8$horizontal_score1, Exp8$RPE_score1, Exp8$endothelial_score1)
+best_cell_score <- colnames(cell_cluster_scores)[max.col(cell_cluster_scores, ties.method = "first")]
+best_cell_score <- sub("Exp8.", "", best_cell_score)
+best_cell_score <-  sub("_score1", "", best_cell_score)
+Exp8$cell.ident <- best_cell_score
+cell_score_colors = c("rod"="cornsilk2", "bipolar"="goldenrod1", "cone"="darkorchid4", "muller_glia"="dodgerblue2", "amacrine"="darkseagreen3", "retinal_ganglion"="darkolivegreen2", "horizontal"="firebrick3", "RPE"="tan3", "endothelial"="cadetblue2")
+
+Exp8$Condition <- factor(Exp8$Condition, levels = c("WT", "Region1 KO", "CRC-SE KO", "Region3 KO", "Region0 KO", "OrJ"))
+
+
+pdf(file = paste(full_path, "Experiment#8/Harmony_Integration/1_Harmony_integration_plots.pdf", sep = ""), width = 12, height = 6)
+p1 <- DimPlot(Exp8, reduction = "umap", group.by = "Sample")
+p2 <- DimPlot(Exp8, reduction = "umap", group.by = "cell.ident", cols = cell_score_colors)
+print(p1 + p2)
+dev.off()
+
+
+pdf(file = paste(full_path, "Experiment#8/Harmony_Integration/5_Final_labeled_cluster_plot2.pdf", sep = ""), width = 36, height = 6)
+# print(DimPlot(Exp8, split.by="Condition", group.by = "cell.ident", cols=cell_score_colors))
+Exp8Plot <- DimPlot(Exp8, split.by="Condition", group.by = "cell.ident", cols=cell_score_colors, pt.size = 1)
+Exp8Plot[[1]]$layers[[1]]$aes_params$alpha = 0.75
+print(Exp8Plot)
+dev.off()
+
+write.csv(table(Exp8$cell.ident, Exp8$Condition), file = paste(full_path, "Experiment#8/Harmony_Integration/5_Cell_cluster_count_per_condition_data.csv", sep = ""))
+write.csv(table(Exp8$cell.ident, Exp8$Sample), file = paste(full_path, "Experiment#8/Harmony_Integration/5_Cell_cluster_count_per_sample_data.csv", sep = ""))
+write.csv(prop.table(table(Exp8$cell.ident, Exp8$Condition), margin = 2) *100, file = paste(full_path, "Experiment#8/Harmony_Integration/5_Cell_cluster_percentage_data.csv", sep = ""))
+
+df <- data.frame(prop.table(table(Exp8$cell.ident, Exp8$Condition), margin = 2) *100)
+pdf(file = paste(full_path, "Experiment#8/Harmony_Integration/5_Cell_cluster_percentage_plot.pdf", sep = ""), width = 12, height = 3)
+print(ggplot(aes(y=Freq, x=Var2, fill=Var1), data = df) + geom_bar(stat = 'identity') + coord_flip() + scale_fill_manual('Cell types', values = cell_score_colors) + theme_classic())
+dev.off()
+
+
+cond_subset <- subset(Exp8, subset = Condition %in% c("WT", "Region1 KO", "CRC-SE KO", "Region0 KO"))
+pdf(file = paste(full_path, "Experiment#8/Harmony_Integration/6_Supp_replicates_labeled_cluster_plot.pdf", sep = ""), width = 24, height = 6)
+print(DimPlot(cond_subset, split.by="Condition", group.by = "Sample", cols = c("black", "grey", "black", "grey", "black", "grey", "black", "grey")))
+dev.off()
+
+write.csv(prop.table(table(cond_subset$cell.ident, cond_subset$Sample), margin = 2) *100, file = paste(full_path, "Experiment#8/Harmony_Integration/6_Supp_replicate_cell_cluster_percentage_data.csv", sep = ""))
+
+
+
+WT <- subset(cond_subset, subset = Sample %in% c("DYE3885", "DYE6384"))
+df <- data.frame(prop.table(table(WT$cell.ident, WT$Sample), margin = 2) *100)
+pdf(file = paste(full_path, "Experiment#8/Harmony_Integration/6_Supp_replicate_WT_cell_cluster_percentage_plot.pdf", sep = ""), width = 6, height = 2)
+print(ggplot(aes(y=Freq, x=Var2, fill=Var1), data = df) + geom_bar(stat = 'identity') + coord_flip() + scale_fill_manual('Cell types', values = cell_score_colors) + theme_classic() + theme(legend.text = element_text(size=8), legend.key.size = unit(0.2, "cm"), legend.title = element_text(size=9)) )
+dev.off()
+
+R1 <- subset(cond_subset, subset = Sample %in% c("DYE3884", "DYE6385"))
+df <- data.frame(prop.table(table(R1$cell.ident, R1$Sample), margin = 2) *100)
+pdf(file = paste(full_path, "Experiment#8/Harmony_Integration/6_Supp_replicate_R1_cell_cluster_percentage_plot.pdf", sep = ""), width = 6, height = 2)
+print(ggplot(aes(y=Freq, x=Var2, fill=Var1), data = df) + geom_bar(stat = 'identity') + coord_flip() + scale_fill_manual('Cell types', values = cell_score_colors) + theme_classic() + theme(legend.text = element_text(size=8), legend.key.size = unit(0.2, "cm"), legend.title = element_text(size=9)))
+dev.off()
+
+CRC <- subset(cond_subset, subset = Sample %in% c("DYE_2521", "DYE_2522"))
+df <- data.frame(prop.table(table(CRC$cell.ident, CRC$Sample), margin = 2) *100)
+pdf(file = paste(full_path, "Experiment#8/Harmony_Integration/6_Supp_replicate_CRC_cell_cluster_percentage_plot.pdf", sep = ""), width = 6, height = 2)
+print(ggplot(aes(y=Freq, x=Var2, fill=Var1), data = df) + geom_bar(stat = 'identity') + coord_flip() + scale_fill_manual('Cell types', values = cell_score_colors) + theme_classic() + theme(legend.text = element_text(size=8), legend.key.size = unit(0.2, "cm"), legend.title = element_text(size=9)))
+dev.off()
+
+R0 <- subset(cond_subset, subset = Sample %in% c("DYE6382", "DYE6383"))
+df <- data.frame(prop.table(table(R0$cell.ident, R0$Sample), margin = 2) *100)
+pdf(file = paste(full_path, "Experiment#8/Harmony_Integration/6_Supp_replicate_R0_cell_cluster_percentage_plot.pdf", sep = ""), width = 6, height = 2)
+print(ggplot(aes(y=Freq, x=Var2, fill=Var1), data = df) + geom_bar(stat = 'identity') + coord_flip() + scale_fill_manual('Cell types', values = cell_score_colors) + theme_classic() + theme(legend.text = element_text(size=8), legend.key.size = unit(0.2, "cm"), legend.title = element_text(size=9)))
+dev.off()
+
+
+
+
+rm(Seurat.list)
+```
