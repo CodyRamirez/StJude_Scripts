@@ -322,3 +322,175 @@ Generate.Feature.Plots <- function(Seurat.Exp, Experiment.Number, Integration.Me
   }
 }
 ```
+
+
+
+
+
+```{r}
+Generate.Cell.Signature.Plots.Top50 <- function(Seurat.Exp, Experiment.Number, Integration.Method, Age)
+{
+  dir.create(paste(full_path, "Experiment#", Experiment.Number, sep = ""))
+  dir.create(paste(full_path, "Experiment#", Experiment.Number, "/", Integration.Method, "_Integration/", sep = ""))
+  
+  if (Age == 'Embryonic'){
+
+    pdf(file = paste(full_path, "Experiment#", Experiment.Number, "/", Integration.Method, "_Integration/4_", Integration.Method, "_cell_signature_top50DE_plots.pdf", sep = ""), width = 12, height = 6)
+    
+    #Retinal progenitor cells (RPC):
+    Retinal.Progenitor.Genes <- c('Fgf15', 'Pclaf', 'Top2a', 'Hes1', 'Zfp36l1', 'Id2', 'Cenpf', 'Itm2a', 'Plagl1', 'Spc25', 'Birc5', 'Ube2c', 'Rrm2', 'Smc4', 'Id1', 'Cdca3', 'Vsx2', 'Cdca8', 'Lockd', 'Espn', 'Gmnn', 'Fgf3', 'Nusap1', 'Sox2', 'Dtl', 'Cox4i2', 'Usp1', 'Dnajc9', 'Ndufa4l2', 'Ccna2', 'Smc2', 'Lig1', 'Myb', 'Cenpa', 'Rpa2', 'Slc1a3', 'Nr2e1', 'Col9a1', 'Mki67', 'Prdx4', 'Hat1', 'Spc24', 'Cdk1', 'Prc1', 'Hist1h4i', 'Cdca7', 'Pbk')
+    Retinal.Progenitor.Genes <- Retinal.Progenitor.Genes[Retinal.Progenitor.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Retinal.Progenitor.Genes), name = 'retinal_progenitor_score')
+    print(FeaturePlot(Seurat.Exp, features = "retinal_progenitor_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "retinal_progenitor_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "retinal_progenitor_score1", pt.size = 0) + theme(aspect.ratio = 1))
+    
+    #Neurogenic cells (characterized by expression of neurogenic bHLH factors):
+    Neurogenic.Genes = c('Atoh7', 'Dlx2', 'Dlx1', 'Mfng', 'Rassf4', 'Pou4f2', 'Insm2', 'Ppp1r14a', 'Isl1', 'Plk3', 'Rab15', 'Igfbpl1', 'Miat', 'Rgs16', 'Btbd17', 'Elavl4', 'Gal', 'Igfbp5', 'Selenom')
+    Neurogenic.Genes <- Neurogenic.Genes[Neurogenic.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Neurogenic.Genes), name = 'neurogenic_score')
+    print(FeaturePlot(Seurat.Exp, features = "neurogenic_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "neurogenic_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "neurogenic_score1", pt.size = 0) + theme(aspect.ratio = 1))
+    
+    #Retinal ganglion cells (RGC):
+    Retinal.Ganglion.Genes = c('Sncg', 'Gap43', 'Nefl', 'Ebf1', 'Nefm', 'Ina', 'Stmn3', 'Gng3', 'Pou6f2', 'Elavl4', 'S100a10', 'Mapt', 'Isl1', 'Igfbpl1', 'Snca', 'Snhg11', 'Islr2', 'Crmp1', 'Stmn4', 'Dcx', 'Pcsk1n', 'Rbpms', 'Pou4f1', 'Ebf3', 'Ly6h', 'Nrn1', 'Nsg2', 'Apbb2', 'Tppp3', 'Syt4', 'Gng2', 'Cdk5r1', 'Akap7', 'Tubb2a', 'Nhlh2', 'Gnao1', 'Stx7', 'Tubb4a', 'Kif5c', 'Tmeff1', 'Rbfox2', 'Syt13', 'Zfhx3', 'Rbpms2', 'Rac3', 'L1cam', 'Rab6b', 'Cntn2', 'Dusp26', 'Nell2')
+    Retinal.Ganglion.Genes <- Retinal.Ganglion.Genes[Retinal.Ganglion.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Retinal.Ganglion.Genes), name = 'retinal_ganglion_score')
+    print(FeaturePlot(Seurat.Exp, features = "retinal_ganglion_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "retinal_ganglion_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "retinal_ganglion_score1", pt.size = 0) + theme(aspect.ratio = 1))
+
+    #Cone cells:
+    Cone.Genes = c('Gngt2', 'Neurod1', 'Otx2', 'Thrb', 'Meis2', 'Fabp7', 'Pik3r1', 'Crx', 'Tmem158', 'Neurod4', 'Lypd1', 'Pdc', 'Prdm1', 'Mfap4', 'Chgb', 'Cplx2', 'Gm4792', 'Gnb3', 'Cntn1', 'Ankrd33b', 'Cplx3', 'D930028M14Rik', 'Shisa2', 'Unc119', 'Platr17', 'Pgm2', 'Rpgrip1', 'Pgc', 'Btbd17', 'Snap25', 'Lrp1b', 'Samsn1', 'Syp', 'C1qtnf12', 'Grina', 'Rxrg', 'Slc1a2', 'Rbp4', 'Elovl4', 'Klc3', 'Ctsf', 'Lcorl', 'Cngb3', 'Dmd', 'Cadm3', 'Tulp1', 'Samd11', 'Vps37b', 'Dll3', 'Ccdc136')
+    Cone.Genes <- Cone.Genes[Cone.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Cone.Genes), name = 'cone_score')
+    print(FeaturePlot(Seurat.Exp, features = "cone_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "cone_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "cone_score1", pt.size = 0) + theme(aspect.ratio = 1))
+
+    #Amacrine cells:
+    Amacrine.Genes = c('Tfap2b', 'Ptf1a', 'Nrxn3', 'Slc1a6', 'Prdm13', 'Tfap2a', 'Cldn5', 'Pmfbp1', 'Krt73', 'P2rx1', 'Cabp1', 'Aplp1', 'Chodl', 'Nupr1', 'Celf3', 'Nhlh2', 'Gm28050', 'Mir124a-1hg', 'Stxbp1', 'Runx1t1', 'Bcl11a', 'Calb2', 'Gamt', 'Csdc2', 'Ndrg1', 'Tshz2', 'Dpysl4', 'E130218I03Rik', 'Hmx1', 'Igfbp5', 'Msra', 'Gpm6a', 'Pde4d', 'Rassf4', 'Nkain4', 'Prox1', 'Tubb2a', 'Pou3f1', 'Rasgef1b')
+    Amacrine.Genes <- Amacrine.Genes[Amacrine.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Amacrine.Genes), name = 'amacrine_score')
+    print(FeaturePlot(Seurat.Exp, features = "amacrine_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "amacrine_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "amacrine_score1", pt.size = 0) + theme(aspect.ratio = 1))
+    
+    #Endothelial cells:
+    Endothelial.Genes = c('Igfbp7', 'Col4a1', 'H19', 'Plvap', 'Col4a2', 'Cdh5', 'Egfl7', 'Cd34', 'Mgp', 'Cldn5', 'Sat1', 'Gng11', 'Col18a1', 'Eng', 'Eva1b', 'Ramp2', 'Bgn', 'Hspg2', 'S100a11', 'Ecscr', 'Plxnd1', 'Emcn', 'Lgals1', 'Igfbp3', 'Pecam1', 'Cd93', 'Rgs5', 'Cnn2', 'Col3a1', 'Ptp4a3', 'Col1a2', 'Gja4', 'Esam', 'Ppic', 'Sparcl1', 'Tie1', 'Anxa2', 'Efna1', 'Anxa3', 'Col15a1', 'Gja1', 'Icam2', 'Flt1', 'Nid1', 'B2m', 'Dkk2', 'Elk3', 'Slc9a3r2', 'Mcam', 'Ecm1')
+    Endothelial.Genes <- Endothelial.Genes[Endothelial.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Endothelial.Genes), name = 'endothelial_score')
+    print(FeaturePlot(Seurat.Exp, features = "endothelial_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "endothelial_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "endothelial_score1", pt.size = 0) + theme(aspect.ratio = 1))
+
+    #Erythrocytes:
+    Erythrocytes.Genes = c('Hbb-y', 'Hba-x', 'Alas2', 'Gypa', 'Hbb-bh1', 'Car2', 'Blvrb', 'Mt1', 'Fech', 'Ube2l6', 'Pnpo', 'Fam210b', 'Mt2', 'Trim10', 'Slc25a37', 'Creg1', 'Tmcc2', 'Fam46c', 'Ncoa4')
+    Erythrocytes.Genes <- Erythrocytes.Genes[Erythrocytes.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Erythrocytes.Genes), name = 'erythrocytes_score')
+    print(FeaturePlot(Seurat.Exp, features = "erythrocytes_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "erythrocytes_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "erythrocytes_score1", pt.size = 0) + theme(aspect.ratio = 1))
+
+    #Embryonic astrocytes:
+    EA.Genes = c('Dlk1', 'AC154683', 'Pax2', 'Wnt8b', 'Nkx6-1', 'Ntn1', 'Wif1', 'Cartpt', 'Pcp4l1', 'Nfia', 'Cdh6', 'Wnt7b', 'Zic4', 'Igfbp5', 'Fabp7', 'Ccnd2', 'Acot1', 'Mgst1', 'Slc5a3', 'Nfib', 'Zic1', 'Fgf8', 'H19', 'Maf', 'B2m', 'Mrps6', 'Gsta4', 'Sema5a', 'Fos', 'Hacd2', 'Pdpn', 'Sox9', 'Nr2f2', 'Gpm6b', 'Id4')
+    EA.Genes <- EA.Genes[EA.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(EA.Genes), name = 'embryonic_astrocytes_score')
+    print(FeaturePlot(Seurat.Exp, features = "embryonic_astrocytes_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "embryonic_astrocytes_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "embryonic_astrocytes_score1", pt.size = 0) + theme(aspect.ratio = 1))
+    dev.off()
+    
+    #Lens fiber:
+    LF.Genes = c('Cryba1', 'Cryge', 'Cryab', 'Cryba2', 'Crygc', 'Crygd', 'Crygn', 'Igfbp7', 'Lim2', 'Ccnd2', 'Gja8', 'H19', 'Maf', 'Grifin', 'Htra3', 'Mip', 'Gja3', 'R3hdml', 'Crygs', 'Lix1', 'Nid1', 'Pitx3', 'Col4a1', 'Crim1', 'Prox1', 'Ezr', 'Bfsp2', 'Capn3', 'Tmem40', 'Col6a3', 'Hspb2', 'Slc7a11', 'Col4a2', 'Aldh1a1', 'Sfrp1', 'Pmp22', 'Hmga2', 'Gstm1', 'Cryba4', 'Ssx2ip', 'Nupr1', 'Crybb1', 'Phgdh', 'Peg3', 'Crygb', 'Crygf', 'Cryga')
+    LF.Genes <- LF.Genes[LF.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(LF.Genes), name = 'lens_fiber_score')
+    print(FeaturePlot(Seurat.Exp, features = "lens_fiber_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "lens_fiber_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "lens_fiber_score1", pt.size = 0) + theme(aspect.ratio = 1))
+    dev.off()
+    
+    
+  }
+  
+  else if(Age == 'Adult'){
+    
+    pdf(file = paste(full_path, "Experiment#", Experiment.Number, "/", Integration.Method, "_Integration/4_", Integration.Method, "_cell_signature_top50DE_plots.pdf", sep = ""), width = 60, height = 6)
+    #Rod cells:
+    Rod.Genes <- c('Rp1', 'Cnga1', 'Nrl', 'Pde6b', 'Nr2e3', 'Guca1b', 'Slc24a1', 'Pde6a', 'Samd11', 'Reep6', 'Rs1', 'Rdh12', 'AI847159', 'Pex5l', 'Nxnl1', 'Sgk1', 'Vtn', 'Aipl1', 'Casz1', 'Grk1', 'Hmgb2', 'Fam161a', 'Gm48551', 'Pdzph1', 'Hk2', 'Nxnl2', '1-Mar', 'Prom1', 'Rabgef1', 'Faim', 'Fscn2', 'Susd3', 'Kcnj14', 'Wdr17', 'Drd4', 'Ccdc126', 'Cabp4', 'Lbhd1', 'Grtp1', 'Abca4', 'Slc4a7', 'Mak', 'Mpp4', 'Rgs9', 'Pla2g7', 'D1Ertd622e', 'Pla2r1', 'Tnfsf12', 'Plekhf2', 'Glmn')
+    Rod.Genes <- Rod.Genes[Rod.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Rod.Genes), name = 'rod_score')
+    print(FeaturePlot(Seurat.Exp, features = "rod_score1", label = TRUE)  + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "rod_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "rod_score1", pt.size = 0) + theme(aspect.ratio = 1))
+
+    #Bipolar cells:
+    Bipolar.Genes = c('Gng13', 'Pcp2', 'Trnp1', 'Trpm1', 'Scgn', 'Gm4792', 'Gsg1', 'Lrtm1', 'Cabp5', 'Isl1', 'Cacna2d3', 'Scg2', 'Neurod4', 'Kcnma1', 'B3galt2', 'BC030499', 'Grm6', 'Ntng1', 'Cadps', 'Ndnf', 'Vsx2', 'Qpct', 'Pcp4', 'Nrn1l', 'C130073E24Rik', 'Ptprd', 'Ptprz1', 'Sebox', 'Gabra1', 'Car10', 'Gabrr2', 'Prox1', 'Samsn1', 'Lhx4', 'Fam135b', 'Gabrr1', 'Car8', 'Frmd3', 'Celf3', 'Gpr179', 'Asap2', 'Tmem215', 'Grik1', 'Gnb3', 'Slit2', 'Thsd7a', 'Zfhx4', 'Auts2', 'Tnnt1', 'Cntn4')
+    Bipolar.Genes <- Bipolar.Genes[Bipolar.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Bipolar.Genes), name = 'bipolar_score')
+    print(FeaturePlot(Seurat.Exp, features = "bipolar_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "bipolar_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "bipolar_score1", pt.size = 0) + theme(aspect.ratio = 1))
+
+    #Cone cells:
+    Cone.Genes = c('Opn1sw', 'Pde6h', 'Arr3', 'Opn1mw', 'Gngt2', 'Gnat2', 'Pde6c', 'Kcne2', 'Cngb3', 'Mylk', 'Ccdc136', 'Hopx', 'Osgep', 'Gzmm', 'Pcdh15', 'Olfm1', 'Ndufaf5', 'Adrb1', 'Pgc', 'Acbd6', 'Eif3b', 'Cd59a', 'Ppm1j', 'Scg3', 'Qsox1', 'Fzd10', 'Pygm', 'Ckmt1', 'Thrb', 'Hspb6', 'Nrcam', 'Mgst3', 'Tshz2', 'Slc24a2', 'Fam19a3', 'Gulo', 'Mpp6', 'Dixdc1', 'Mfge8', 'Sptssa', 'Casp7', 'Gsdme', 'Agr2', 'Slc8a3', 'Elovl2', 'Gm42697', 'Jchain', 'Ankrd33', 'Jam3', 'Camk2b')
+    Cone.Genes <- Cone.Genes[Cone.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Cone.Genes), name = 'cone_score')
+    print(FeaturePlot(Seurat.Exp, features = "cone_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "cone_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "cone_score1", pt.size = 0) + theme(aspect.ratio = 1))
+
+    #Muller glia cells:
+    Muller.Glia.Genes = c('Apoe', 'Glul', 'Clu', 'Rlbp1', 'Ptgds', 'Spc25', 'Fxyd1', 'Slc1a3', 'Cp', 'Sparc', 'Cd9', 'Prdx6', 'Car14', 'Dkk3', 'Hes1', 'Dapl1', 'Ptn', 'Abca8a', 'Cryab', 'Trf', 'Espn', 'Fos', 'Gnai2', 'Timp3', 'Kdr', 'Cox4i2', 'Gpr37', 'Aqp4', 'Pdpn', 'Vim', 'Sox9', 'Plpp3', 'Crym', 'Zfp36l1', 'Jun', 'Gng5', 'Rbp1', 'Tsc22d4', 'Pmepa1', 'Id3', 'Mlc1', 'Spon1', 'Fxyd6', 'Slmap', 'Ndrg2', 'Hopx', 'Gpm6b', 'S100a16', 'Slitrk2', 'S100a1')
+    Muller.Glia.Genes <- Muller.Glia.Genes[Muller.Glia.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Muller.Glia.Genes), name = 'muller_glia_score')
+    print(FeaturePlot(Seurat.Exp, features = "muller_glia_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "muller_glia_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "muller_glia_score1", pt.size = 0) + theme(aspect.ratio = 1))
+
+    #Amacrine cells:
+    Amacrine.Genes = c('Snhg11', 'Cartpt', 'Pax6', 'Atp1b1', 'Basp1', 'Tfap2b', 'C1ql1', 'Slc6a9', 'Slc32a1', 'Nhlh2', 'Elavl3', 'Slc6a1', 'Rph3a', 'Tkt', 'Gad1', 'Ebf1', 'Nrxn2', 'Ly6h', 'Synpr', 'Calb2', 'Nrxn1', 'Tac1', 'Nrsn1', 'Lamp5', 'Cxcl14', 'Hpca', 'Lsamp', 'Ndrg4', 'Dlgap1', 'Tmx4', 'Six3', 'Ldhb', 'Lhfp', 'Crabp1', 'Stmn1', 'Marcks', 'Ptprf', 'Insig1', 'Cplx2', 'Tagln3', 'Dync1i1', 'Cdk14', 'Necab1', 'Resp18', 'Gpm6a', 'Chd3os', 'Cabp1', 'Pnmal2', 'Gria3', 'C1ql2')
+    Amacrine.Genes <- Amacrine.Genes[Amacrine.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Amacrine.Genes), name = 'amacrine_score')
+    print(FeaturePlot(Seurat.Exp, features = "amacrine_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "amacrine_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "amacrine_score1", pt.size = 0) + theme(aspect.ratio = 1))
+
+    #Retinal ganglion cells (RGC):
+    Retinal.Ganglion.Genes = c('Calb2', 'Sncg', 'Nefl', 'Nrn1', 'Stmn2', 'Uchl1', 'Thy1', 'Rbpms', 'Pou4f1', 'Fxyd7', 'Rbpms2', 'Tusc5', 'Nrgn', 'Ebf1', 'Slc17a6', 'S100a10', 'Atp1b1', 'Tppp3', 'Nefm', 'Olfm1', 'Gap43', 'Cdk14', 'Tmem163', 'Pcdh10', 'Scn1a', 'Nell2', 'Clec2l', 'Mt3', 'Epha5', 'Scn2a', 'Ina', 'Tubb3', 'Snca', 'Emc10', 'Resp18', 'Atp2b2', 'Nrxn1', 'Srgap1', 'A2ml1', '2900055J20Rik', 'Myt1l', 'Spock2', 'Alcam', 'Fgf12', 'Apbb2', 'Fabp5', 'Scn1b', 'Cend1', 'Rbfox3', 'Nsg2')
+    Retinal.Ganglion.Genes <- Retinal.Ganglion.Genes[Retinal.Ganglion.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Retinal.Ganglion.Genes), name = 'retinal_ganglion_score')
+    print(FeaturePlot(Seurat.Exp, features = "retinal_ganglion_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "retinal_ganglion_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "retinal_ganglion_score1", pt.size = 0) + theme(aspect.ratio = 1))
+
+    #Horizontal cells:
+    Horizontal.Genes = c('Calb1', 'Tpm3', 'Sept4', 'Slc4a3', 'Adgrb1', 'Atp1b1', 'Onecut2', 'Tnr', 'Vim', 'Lhx1', 'Ppp1r1a', 'Ndrg1', 'Nebl', 'Gng2', 'Ndrg4', 'Lhx1os', 'Adra2a', 'Rgs3', 'Utrn', 'Lmo1', 'Pcsk6', 'Sept8', 'F2r', 'C1ql1', 'Cdc42ep4', 'Slc12a2', 'Akap12', 'Tfap2b', 'Dock4', 'Stmn2', 'Slc4a5', 'Tmem132a', 'Pde3a', 'Lrrc4', 'Lsamp', 'Wfdc10', 'Fam126a', 'Tmod1', 'Megf11', 'Arhgap15', 'Syt2', 'Uchl1', 'Rbfox2', 'Akain1', 'Itgb5', 'Rcan2', 'Pcbd1', 'Myo16', 'Tubb4a', 'Cdh4')
+    Horizontal.Genes <- Horizontal.Genes[Horizontal.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Horizontal.Genes), name = 'horizontal_score')
+    print(FeaturePlot(Seurat.Exp, features = "horizontal_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "horizontal_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "horizontal_score1", pt.size = 0) + theme(aspect.ratio = 1))
+
+    #RPE cells:
+    RPE.Genes = c('Ctss', 'C1qb', 'C1qa', 'C1qc', 'Hexb', 'Tyrobp', 'Ccl12', 'Fcer1g', 'Cx3cr1', 'B2m', 'Ccl4', 'Ly86', 'Ccl3', 'Trem2', 'Csf1r', 'Selplg', 'Laptm5', 'Junb', 'Rgs10', 'Cd52', 'Ccl2', 'Egr1', 'Jun', 'Cd9', 'Aif1', 'Zfp36', 'Cyba', 'Ctsz', 'Lyz2', 'P2ry12', 'Gpr34', 'Siglech', 'Sparc', 'Mafb', 'Tmem119', 'Selenop', 'Rhob', 'Npc2', 'Sat1', 'Olfml3', 'Kctd12', 'Grn', 'Ly6e', 'Ifi27l2a', 'Coro1a', 'Sh3bgrl3', 'Klf2', 'Unc93b1', 'Lyn', 'Ctsh')
+    RPE.Genes <- RPE.Genes[RPE.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(RPE.Genes), name = 'RPE_score')
+    print(FeaturePlot(Seurat.Exp, features = "RPE_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "RPE_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "RPE_score1", pt.size = 0) + theme(aspect.ratio = 1))
+    
+    #Endothelial cells:
+    Endothelial.Genes = c('Ly6c1', 'Cldn5', 'Pltp', 'Cxcl12', 'Ly6a', 'Igfbp7', 'Itm2a', 'Slco1a4', 'Rgs5', 'Flt1', 'Mgp', 'Ifitm3', 'Spock2', 'Crip1', 'Ramp2', 'Egfl7', 'Clec2d', 'Klf2', 'Ptprb', 'Sparcl1', 'Ly6e', 'Acta2', 'Abcb1a', 'Slc7a5', 'Id3', 'Tagln', 'Slc9a3r2', 'Tm4sf1', 'Myl9', 'Id1', 'Crip2', 'Slc2a1', 'Hspb1', 'Fn1', 'Sparc', 'Epas1', 'Adgrl4', 'Abhd2', 'Ctla2a', 'Fxyd5', 'Slco1c1', 'Selenop', 'Pdgfb', 'Adgrf5', 'Ahnak', 'Abcg2', 'Rgcc', 'Pglyrp1', 'Gng11', 'Gpcpd1')
+    Endothelial.Genes <- Endothelial.Genes[Endothelial.Genes %in% getGenes(Seurat.Exp)]
+    Seurat.Exp <- AddModuleScore(object = Seurat.Exp, features = list(Endothelial.Genes), name = 'endothelial_score')
+    print(FeaturePlot(Seurat.Exp, features = "endothelial_score1", label = TRUE) + theme(aspect.ratio = 1))
+    print(FeaturePlot(Seurat.Exp, features = "endothelial_score1", label = TRUE, split.by = "Sample") + theme(aspect.ratio = 1))
+    print(VlnPlot(Seurat.Exp, features = "endothelial_score1", pt.size = 0) + theme(aspect.ratio = 1))
+    
+    dev.off()
+  }
+  return(Seurat.Exp)
+}
+```
