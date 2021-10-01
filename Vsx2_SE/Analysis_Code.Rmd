@@ -189,3 +189,136 @@ Liger.Integration <- function(Seurat.list)
   return(Seurat.combined)
 }
 ```
+
+
+
+
+
+```{r}
+Generate.Integration.Plots <- function(Seurat.Exp, Experiment.Number, Integration.Method, Age)
+{
+  dir.create(paste(full_path, "Experiment#", Experiment.Number, sep = ""))
+  dir.create(paste(full_path, "Experiment#", Experiment.Number, "/", Integration.Method, "_Integration/", sep = ""))
+  
+  pdf(file = paste(full_path, "Experiment#", Experiment.Number, "/", Integration.Method, "_Integration/1_", Integration.Method, "_integration_plots.pdf", sep = ""), width = 12, height = 6)
+  p1 <- DimPlot(Seurat.Exp, reduction = "umap", group.by = "Sample")
+  p2 <- DimPlot(Seurat.Exp, reduction = "umap", label = TRUE, repel = TRUE)
+  print(p1 + p2)
+  dev.off()
+  
+  total.width = length(unique(Seurat.Exp$Sample))*6
+  pdf(file = paste(full_path, "Experiment#", Experiment.Number, "/", Integration.Method, "_Integration/2_", Integration.Method, "_integration_plots.pdf", sep = ""), width = total.width, height = 6)
+  print(DimPlot(Seurat.Exp, reduction = "umap", label = TRUE, split.by = "Sample"))
+  dev.off()
+}
+```
+
+
+
+
+
+```{r}
+Generate.Feature.Plots <- function(Seurat.Exp, Experiment.Number, Integration.Method, Age)
+{
+  dir.create(paste(full_path, "/Experiment#", Experiment.Number, sep = ""))
+  dir.create(paste(full_path, "/Experiment#", Experiment.Number, "/", Integration.Method, "_Integration/", sep = ""))
+  
+  if (Age == 'Embryonic'){
+
+    pdf(file = paste(full_path, "/Experiment#", Experiment.Number, "/", Integration.Method, "_Integration/3_", Integration.Method, "_feature_plots.pdf", sep = ""), width = 12, height = 36)
+    #Retinal progenitor cells (RPC):
+    Retinal.Progenitor.Genes <- c("Pax6", "Cdk4", "Ccnd1", "Vsx2", "Lhx2", "Fgf15", "Sfrp2")
+    Retinal.Progenitor.Genes <- Retinal.Progenitor.Genes[Retinal.Progenitor.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Retinal.Progenitor.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #Neurogenic cells (characterized by expression of neurogenic bHLH factors):
+    Neurogenic.Genes = c("Atoh7", "Olig2", "Neurog2", "Neurod1")
+    Neurogenic.Genes <- Neurogenic.Genes[Neurogenic.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Neurogenic.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #Retinal ganglion cells (RGC):
+    Retinal.Ganglion.Genes = c("Thy1", "Nrn1", "Pou4f1", "Slc17a6", "Tusc5", "Rbpms")
+    Retinal.Ganglion.Genes <- Retinal.Ganglion.Genes[Retinal.Ganglion.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Retinal.Ganglion.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #Cone cells:
+    Cone.Genes = c("Pde6c", "Pde6h", "Arr3", "Opn1sw", "Thrb", "Crx")
+    Cone.Genes <- Cone.Genes[Cone.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Cone.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #Amacrine cells:
+    Amacrine.Genes = c("Tfap2a", "Tfap2b", "Pax6")
+    Amacrine.Genes <- Amacrine.Genes[Amacrine.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Amacrine.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #RPE/endothelial cells:
+    RPE.Endothelial.Genes = c("Mitf", "Msx1", "H19", "Cfh", "Pecam1", "Cspg4")
+    RPE.Endothelial.Genes <- RPE.Endothelial.Genes[RPE.Endothelial.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, RPE.Endothelial.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #Erythrocytes:
+    Erythrocytes.Genes = c("Hba-a2", "Alas2", "Hbb-bt", "Fech")
+    Erythrocytes.Genes <- Erythrocytes.Genes[Erythrocytes.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Erythrocytes.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    dev.off()
+    
+  }
+  
+  else if(Age == 'Adult'){
+    
+    pdf(file = paste(full_path, "/Experiment#", Experiment.Number, "/", Integration.Method, "_Integration/3_", Integration.Method, "_feature_plots.pdf", sep = ""), width = 12, height = 36)
+    #Rod cells:
+    Rod.Genes <- c('Nrl', 'Rho', 'Pdc', 'Pde6a', 'Pde6b')
+    Rod.Genes <- Rod.Genes[Rod.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Rod.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #Bipolar cells:
+    Bipolar.Genes = c('Vsx2', 'Sebox', "Scgn")
+    Bipolar.Genes <- Bipolar.Genes[Bipolar.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Bipolar.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #Cone cells:
+    Cone.Genes = c("Pde6c", "Pde6h", "Arr3")
+    Cone.Genes <- Cone.Genes[Cone.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Cone.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+
+    #Muller glia cells:
+    Muller.Glia.Genes = c('Rlbp1', 'Rbp1', 'Cryab', 'Sox2')
+    Muller.Glia.Genes <- Muller.Glia.Genes[Muller.Glia.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Muller.Glia.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #GABAergic amacrine cells:
+    GABAergic.Amacrine.Genes = c('Gad1', 'Syt7', 'Slc6a1', 'Slc32a1')
+    GABAergic.Amacrine.Genes <- GABAergic.Amacrine.Genes[GABAergic.Amacrine.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, GABAergic.Amacrine.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #Glycinergic amacrine cells:
+    Glycinergic.Amacrine.Genes = c('Slc6a9', 'Lamp5')
+    Glycinergic.Amacrine.Genes <- Glycinergic.Amacrine.Genes[Glycinergic.Amacrine.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Glycinergic.Amacrine.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #Retinal ganglion cells (RGC):
+    Retinal.Ganglion.Genes = c("Thy1", "Nrn1", "Pou4f1", "Slc17a6", "Tusc5", "Rbpms")
+    Retinal.Ganglion.Genes <- Retinal.Ganglion.Genes[Retinal.Ganglion.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Retinal.Ganglion.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #Horizontal cells:
+    Horizontal.Genes = c("Calb1", "Lhx1", "Oc3")
+    Horizontal.Genes <- Horizontal.Genes[Horizontal.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Horizontal.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #RPE/endothelial cells:
+    RPE.Endothelial.Genes = c("Mitf", "Msx1", "H19", "Cfh", "Pecam1", "Cspg4", "Cd34")
+    RPE.Endothelial.Genes <- RPE.Endothelial.Genes[RPE.Endothelial.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, RPE.Endothelial.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+    
+    #Erythrocytes:
+    Erythrocytes.Genes = c("Hba-a2", "Alas2", "Hbb-bt", "Fech")
+    Erythrocytes.Genes <- Erythrocytes.Genes[Erythrocytes.Genes %in% getGenes(Seurat.Exp)]
+    multi_dittoDimPlot(Seurat.Exp, Erythrocytes.Genes, split.by = 'Sample', ncol = 1, min.color = "gray90", max.color = "purple", theme = theme_classic() + theme(aspect.ratio = 1))
+
+    dev.off()
+  }
+}
+```
