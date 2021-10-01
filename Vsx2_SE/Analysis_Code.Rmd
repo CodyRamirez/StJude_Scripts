@@ -88,3 +88,104 @@ rm(qc_cutoff, Seurat.data)
 
 
 
+```{r}
+Single.Sample <- function(Seurat.obj)
+{
+  Seurat.obj <- NormalizeData(Seurat.obj)
+  Seurat.obj <- CellCycleScoring(Seurat.obj, s.features = s.genes, g2m.features = g2m.genes)
+  Seurat.obj <- FindVariableFeatures(Seurat.obj, selection.method = "vst", nfeatures = 3000)
+  Seurat.obj <- ScaleData(Seurat.obj)
+  Seurat.obj <- RunPCA(Seurat.obj, verbose = FALSE)
+  Seurat.obj <- RunUMAP(Seurat.obj, dims = 1:30)
+  Seurat.obj <- FindNeighbors(Seurat.obj, dims = 1:30)
+  Seurat.obj <- FindClusters(Seurat.obj, resolution = 0.4, algorithm = 4)
+  
+  return(Seurat.obj)
+}
+
+
+Simple.Merge <- function(Seurat.list)
+{
+
+  Seurat.list <- lapply(X = Seurat.list, FUN = function(x) {
+  x <- NormalizeData(x)
+  x <- CellCycleScoring(x, s.features = s.genes, g2m.features = g2m.genes)
+  })
+  
+  Seurat.combined <- merge(Seurat.list[[1]], Seurat.list[c(-1)])
+  Seurat.combined <- FindVariableFeatures(Seurat.combined, selection.method = "vst", nfeatures = 3000)
+  Seurat.combined <- ScaleData(Seurat.combined)
+  Seurat.combined <- RunPCA(Seurat.combined, verbose = FALSE)
+  Seurat.combined <- RunUMAP(Seurat.combined, dims = 1:30)
+  Seurat.combined <- FindNeighbors(Seurat.combined, dims = 1:30)
+  Seurat.combined <- FindClusters(Seurat.combined, resolution = 0.4, algorithm = 4)
+
+  return(Seurat.combined)
+}
+
+
+Seurat.Integration <- function(Seurat.list)
+{
+
+  Seurat.list <- lapply(X = Seurat.list, FUN = function(x) {
+  x <- SCTransform(x, variable.features.n = 3000, verbose = TRUE, return.only.var.genes = FALSE)
+  x <- CellCycleScoring(x, s.features = s.genes, g2m.features = g2m.genes)
+  })
+  
+  features <- SelectIntegrationFeatures(object.list = Seurat.list, nfeatures = 3000)
+  Seurat.list <- PrepSCTIntegration(object.list = Seurat.list, anchor.features = features)
+  anchors <- FindIntegrationAnchors(object.list = Seurat.list, normalization.method = "SCT", anchor.features = features)
+  Seurat.combined <- IntegrateData(anchorset = anchors, normalization.method = "SCT")
+  Seurat.combined <- RunPCA(Seurat.combined, verbose = FALSE)
+  Seurat.combined <- RunUMAP(Seurat.combined, reduction = "pca", dims = 1:30)
+  Seurat.combined <- FindNeighbors(Seurat.combined, dims = 1:30)
+  Seurat.combined <- FindClusters(Seurat.combined, resolution = 0.4, algorithm = 4)
+
+  return(Seurat.combined)
+}
+
+
+Harmony.Integration <- function(Seurat.list)
+{
+
+  Seurat.list <- lapply(X = Seurat.list, FUN = function(x) {
+  x <- NormalizeData(x)
+  x <- CellCycleScoring(x, s.features = s.genes, g2m.features = g2m.genes)
+  })
+  
+  Seurat.combined <- merge(Seurat.list[[1]], Seurat.list[c(-1)])
+  Seurat.combined <- FindVariableFeatures(Seurat.combined, selection.method = "vst", nfeatures = 3000)
+  Seurat.combined <- ScaleData(Seurat.combined)
+  Seurat.combined <- RunPCA(Seurat.combined, verbose = FALSE)
+  Seurat.combined <- RunHarmony(Seurat.combined, group.by.vars = "Sample")
+  Seurat.combined <- RunUMAP(Seurat.combined, reduction = "harmony", dims = 1:30)
+  Seurat.combined <- FindNeighbors(Seurat.combined, reduction = "harmony", dims = 1:30)
+  Seurat.combined <- FindClusters(Seurat.combined, resolution = 0.4, algorithm = 4)
+
+  return(Seurat.combined)
+}
+
+
+Liger.Integration <- function(Seurat.list)
+{
+
+  Seurat.list <- lapply(X = Seurat.list, FUN = function(x) {
+  x <- NormalizeData(x)
+  x <- CellCycleScoring(x, s.features = s.genes, g2m.features = g2m.genes)
+  })
+  
+  Seurat.combined <- merge(Seurat.list[[1]], Seurat.list[c(-1)])
+  Seurat.combined <- FindVariableFeatures(Seurat.combined, selection.method = "vst", nfeatures = 3000)
+  Seurat.combined <- ScaleData(Seurat.combined, split.by = "Sample", do.center = FALSE)
+  Seurat.combined <- RunOptimizeALS(Seurat.combined, k = 20, lambda = 5, split.by = "Sample")
+  Seurat.combined <- RunQuantileNorm(Seurat.combined, split.by = "Sample")
+  # You can optionally perform Louvain clustering (`FindNeighbors` and `FindClusters`) after
+  # `RunQuantileNorm` according to your needs
+  Seurat.combined <- FindNeighbors(Seurat.combined, reduction = "iNMF", dims = 1:20)
+  # Dimensional reduction and plotting
+  Seurat.combined <- RunUMAP(Seurat.combined, dims = 1:ncol(Seurat.combined[["iNMF"]]), reduction = "iNMF")
+  Seurat.combined <- FindClusters(Seurat.combined, resolution = 0.4, algorithm = 4)
+  
+  return(Seurat.combined)
+}
+```
