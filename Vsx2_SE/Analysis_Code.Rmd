@@ -34,50 +34,57 @@ plan(strategy = "multiprocess", workers = 50)#Changing the current plan to acces
 options(parallelly.fork.enable = TRUE, future.globals.maxSize = +Inf, future.seed = TRUE) #enables forking in Rstudio (potentially unstable)
 plan()
 
-#pull standard cell cycle genes for cell cycle scoring
-#Had to change genes to title case for mice genes (Human genes are annotated in all CAPS)
+# Pull standard cell cycle genes for cell cycle scoring
+# Had to change genes to title case for mice genes (Human genes are annotated in all CAPS)
 s.genes <- str_to_title(cc.genes.updated.2019$s.genes)
 g2m.genes <- str_to_title(cc.genes.updated.2019$g2m.genes)
 
-#identifies all samples in directory based on folder names
+# Identifies all samples in directory based on folder names
 samples <- list.dirs(paste(full_path, "/CellRangerCount", sep = ""), recursive = F)
 
-#reads QC spreadsheet (columns are 'Sample', 'lower', 'upper', and 'mito')
+# Reads QC spreadsheet (columns are 'Sample', 'lower', 'upper', and 'mito')
 qc_cutoff <- read.csv(paste(full_path, "/scRNAseq_QC_cutoff.tsv", sep = ""), sep = '\t', header = TRUE)
 
 
-#this for loop, pulls cellbender corrected count matrices and generates QC plots
 sample.name <- vector()
 Seurat.obj <- list()
 
 
-
+# For loops through all scRNA-Seq samples
 for (i in 1:length(samples)){
   
+  # Reads in CellRanger aligned data
   Seurat.data <- Read10X(data.dir = paste(full_path, "/CellRangerCount/", sample.name[i], "/outs/filtered_feature_bc_matrix", sep = ""))
 
+  # Creates a Seurat Object, only includes genes expressed in at least 3 cells and includes cells where at least 200 genes were detected
   Seurat.obj[[i]] <- CreateSeuratObject(counts = Seurat.data, min.cells = 3, min.features = 200)
 
+  # Adds sample name to metadata
   Seurat.obj[[i]]$Sample <- sample.name[i]
 
+  # Calculate the percentage of reads that map to the mitochondrial genome
   Seurat.obj[[i]] <- PercentageFeatureSet(Seurat.obj[[i]], pattern = "^mt-", col.name = "percent.mito")
   
-  
-  #View of data before filtering is conducted
-  VlnPlot(object = Seurat.obj[[i]], features = c("nCount_RNA", "nFeature_RNA", "percent.mito"), pt.size = 0, ncol = 2)
+  # Visualize QC metric data before filtering is conducted
+  VlnPlot(object = Seurat.obj[[i]], features = c("nCount_RNA", "nFeature_RNA", "percent.mito"), pt.size = 0, ncol = 3)
   FeatureScatter(object = Seurat.obj[[i]], feature1 = "nCount_RNA", feature2 = "percent.mito") + ggplot2::geom_hline(yintercept = qc_cutoff$mito[i])
   FeatureScatter(object = Seurat.obj[[i]], feature1 = "nCount_RNA", feature2 = "nFeature_RNA") + ggplot2::geom_hline(yintercept = qc_cutoff$lower[i]) + ggplot2::geom_hline(yintercept = qc_cutoff$upper[i])
 
-  #Filtering cells by # of genes and mitochondrial content
+  # Filtering cells by # of genes and mitochondrial content, specific filtering parameters can be found in scRNAseq_QC_cutoff.tsv
   ############################################################################################################
   Seurat.obj[[i]] <- subset(x = Seurat.obj[[i]], subset = nFeature_RNA < qc_cutoff$upper[i] & nFeature_RNA > qc_cutoff$lower[i] & percent.mito < qc_cutoff$mito[i])
   ############################################################################################################
   
-  #View of data after filtering is conducted
-  VlnPlot(object = Seurat.obj[[i]], features = c("nCount_RNA", "nFeature_RNA", "percent.mito"), pt.size = 0, ncol = 2)
+  # Visualize QC metric data after filtering is conducted
+  VlnPlot(object = Seurat.obj[[i]], features = c("nCount_RNA", "nFeature_RNA", "percent.mito"), pt.size = 0, ncol = 3)
   FeatureScatter(object = Seurat.obj[[i]], feature1 = "nCount_RNA", feature2 = "percent.mito") + ggplot2::geom_hline(yintercept = qc_cutoff$mito[i])
   FeatureScatter(object = Seurat.obj[[i]], feature1 = "nCount_RNA", feature2 = "nFeature_RNA") + ggplot2::geom_hline(yintercept = qc_cutoff$lower[i]) + ggplot2::geom_hline(yintercept = qc_cutoff$upper[i])
 
 }
 rm(qc_cutoff, Seurat.data)
 ```
+
+
+
+
+
